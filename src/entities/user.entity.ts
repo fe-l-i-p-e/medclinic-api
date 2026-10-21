@@ -1,37 +1,22 @@
-// @ts-nocheck
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
 
 export enum UserRole {
   ADMIN = "admin",
-  ATTENDANT = "attendant",
+  SECRETARY = "secretary",
+  DOCTOR = "doctor",
 }
 
 @Entity("user")
 export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn() id!: number;
 
-  @Column({ type: "varchar", length: 120 })
-  name!: string;
+  @Column({ length: 120 }) name!: string;
 
-  @Column({ type: "varchar", length: 160, unique: true })
-  email!: string;
+  @Column({ length: 160, unique: true }) email!: string;
 
-  @Column({ type: "varchar", length: 255 })
-  password!: string;
+  @Column({ length: 255 }) password!: string;
 
-  @Column({
-    type: "enum",
-    enum: UserRole,
-    default: UserRole.ATTENDANT,
-  })
-  role!: UserRole;
+  @Column({ type: "simple-array" }) roles!: UserRole[];
 
-  @CreateDateColumn({ name: "created_at" })
-  createdAt!: Date;
+  @CreateDateColumn({ name: "created_at", type: "timestamptz" }) createdAt!: Date;
 }
