@@ -1,9 +1,25 @@
-export class AppError extends Error {
-  public readonly statusCode: number;
+export type ErrorCode =
+  | "DADOS_INVALIDOS"
+  | "NAO_AUTENTICADO"
+  | "CREDENCIAIS_INVALIDAS"
+  | "ACESSO_NEGADO"
+  | "RECURSO_NAO_ENCONTRADO"
+  | "EMAIL_JA_CADASTRADO"
+  | "CPF_JA_CADASTRADO"
+  | "CRM_JA_CADASTRADO"
+  | "HORARIO_INDISPONIVEL"
+  | "PACIENTE_INDISPONIVEL"
+  | "HORARIO_FORA_DA_ESCALA"
+  | "TRANSICAO_INVALIDA"
+  | "ERRO_INTERNO";
 
-  constructor(message: string, statusCode = 400) {
+export class AppError extends Error {
+  constructor(
+    public readonly code: ErrorCode,
+    public readonly statusCode: number,
+    message: string
+  ) {
     super(message);
-    this.statusCode = statusCode;
     Object.setPrototypeOf(this, AppError.prototype);
   }
 }
