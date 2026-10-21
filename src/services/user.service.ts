@@ -1,50 +1,37 @@
-import { UserRepository } from "../repositories/UserRepository";
-import { CreateUserDTO } from "../dtos/CreateUserDTO";
-import { toUserResponseDTO, UserResponseDTO } from "../dtos/UserResponseDTO";
+import { UserRepository } from "../repositories/user.repository";
+import { CreateUserDTO } from "../dtos/user/create-user.dto";
+import { toUserResponseDTO, UserResponseDTO } from "../dtos/user/user-response.dto";
 import { hashPassword } from "../utils/hash";
-import { AppError } from "../utils/AppError";
-import { UserRole } from "../entities/User";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { AppError } from "../utils/app-error";
+import { UserRole } from "../entities/user.entity";
 
 export class UserService {
-  private userRepository: UserRepository;
+  constructor(private userRepository: UserRepository) {}
 
-  constructor() {
-    this.userRepository = new UserRepository();
-  }
-
-  async register(data: CreateUserDTO): Promise<UserResponseDTO> {
+  async create(data: CreateUserDTO): Promise<UserResponseDTO> {
     if (!data.name || !data.email || !data.password) {
-      throw new AppError("Nome, e-mail e senha são obrigatórios.", 400);
+      throw new AppError("DADOS_INVALIDOS", 400, "Campos obrigatórios ausentes.");
+    }
+    if (!data.roles?.length || !data.roles.every((r) => Object.values(UserRole).includes(r))) {
+      throw new AppError("DADOS_INVALIDOS", 400, "Perfil inexistente em roles.");
     }
 
-    if (!EMAIL_REGEX.test(data.email)) {
-      throw new AppError("Formato de e-mail inválido.", 400);
-    }
-
-    const existingUser = await this.userRepository.findByEmail(data.email);
-    if (existingUser) {
-      throw new AppError("Este e-mail já está cadastrado.", 409);
-    }
+    const existing = await this.userRepository.findByEmail(data.email);
+    if (existing) throw new AppError("EMAIL_JA_CADASTRADO", 409, "E-mail já cadastrado.");
 
     const hashedPassword = await hashPassword(data.password);
-
     const user = await this.userRepository.create({
       name: data.name,
       email: data.email,
       password: hashedPassword,
-      role: data.role ?? UserRole.ATTENDANT,
+      roles: data.roles,
     });
-
     return toUserResponseDTO(user);
   }
 
   async getById(id: number): Promise<UserResponseDTO> {
     const user = await this.userRepository.findById(id);
-    if (!user) {
-      throw new AppError("Usuário não encontrado.", 404);
-    }
+    if (!user) throw new AppError("RECURSO_NAO_ENCONTRADO", 404, "Usuário não encontrado.");
     return toUserResponseDTO(user);
   }
 }

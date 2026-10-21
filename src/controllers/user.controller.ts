@@ -1,16 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { UserService } from "../services/UserService";
+import { UserService } from "../services/user.service";
 
 export class UserController {
-  private userService: UserService;
+  constructor(private userService: UserService) {}
 
-  constructor() {
-    this.userService = new UserService();
-  }
-
-  register = async (req: Request, res: Response, next: NextFunction) => {
+  create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = await this.userService.register(req.body);
+      const user = await this.userService.create(req.body);
       return res.status(201).json(user);
     } catch (error) {
       next(error);

@@ -1,24 +1,23 @@
 import { Repository } from "typeorm";
-import { AppDataSource } from "../database/data-source";
-import { User } from "../entities/User";
+import { DataSource } from "typeorm";
+import { User } from "../entities/user.entity";
 
 export class UserRepository {
-  private repository: Repository<User>;
+  private repo: Repository<User>;
 
-  constructor() {
-    this.repository = AppDataSource.getRepository(User);
+  constructor(private dataSource: DataSource) {
+    this.repo = dataSource.getRepository(User);
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.repository.findOne({ where: { email } });
+  findByEmail(email: string) {
+    return this.repo.findOne({ where: { email } });
   }
 
-  async findById(id: number): Promise<User | null> {
-    return this.repository.findOne({ where: { id } });
+  findById(id: number) {
+    return this.repo.findOne({ where: { id } });
   }
 
-  async create(data: Partial<User>): Promise<User> {
-    const user = this.repository.create(data);
-    return this.repository.save(user);
+  create(data: Partial<User>) {
+    return this.repo.save(this.repo.create(data));
   }
 }
