@@ -1,12 +1,13 @@
 import { Router } from "express";
-import authRoutes from "./auth.routes";
-import userRoutes from "./user.routes";
-import adminRoutes from "./admin.routes";
+import { Controllers } from "../container";
+import { createHealthRoutes } from "./health.routes";
+import { createAuthRoutes } from "./auth.routes";
+import { createUserRoutes } from "./user.routes";
 
-const router = Router();
-
-router.use("/auth", authRoutes);
-router.use("/users", userRoutes);
-router.use("/admin", adminRoutes);
-
-export default router;
+export function createRoutes(c: Controllers): Router {
+  const router = Router();
+  router.use("/health", createHealthRoutes());
+  router.use("/auth", createAuthRoutes(c.auth));
+  router.use("/users", createUserRoutes(c.user));
+  return router;
+}
