@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { env } from "../config/env";
 import { User } from "../entities/user.entity";
+import { Patient } from "../entities/patient.entity";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -12,6 +13,6 @@ export const AppDataSource = new DataSource({
   database: env.db.database,
   ssl: env.db.ssl ? { rejectUnauthorized: false } : false,
   synchronize: true, // temporário: vira false no Módulo 1
-  entities: [User],
+  entities: [User, Patient],
   migrations: [__dirname + "/migrations/*{.ts,.js}"],
 });
