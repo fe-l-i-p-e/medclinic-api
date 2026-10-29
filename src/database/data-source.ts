@@ -1,18 +1,17 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { env } from "../config/env"
-import { User } from "../entities/User"
+import { env } from "../config/env";
+import { User } from "../entities/user.entity";
 
-export const AppDataSource = new DataSource ({
-    type: "postgres",
-    host: env.db.host,
-    port: env.db.port,
-    username: env.db.username,
-    password: env.db.password,
-    database: env.db.database,
-    synchronize: true, 
-    logging: false,
-    entities: [User],
-    migrations: [],
-
-})
+export const AppDataSource = new DataSource({
+  type: "postgres",
+  host: env.db.host,
+  port: env.db.port,
+  username: env.db.username,
+  password: env.db.password,
+  database: env.db.database,
+  ssl: env.db.ssl ? { rejectUnauthorized: false } : false,
+  synchronize: true, // temporário: vira false no Módulo 1
+  entities: [User],
+  migrations: [__dirname + "/migrations/*{.ts,.js}"],
+});

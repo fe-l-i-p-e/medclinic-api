@@ -1,10 +1,13 @@
 import { Router } from "express";
-import { UserController } from "../controllers/UserController";
-import { authMiddleware } from "../middlewares/AuthMiddleware";
+import { UserController } from "../controllers/user.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
+import { authorize } from "../middlewares/rbac.middleware";
+import { UserRole } from "../entities/user.entity";
 
-const router = Router();
-const userController = new UserController();
-
-router.get("/me", authMiddleware, userController.me);
-
-export default router;
+export function createUserRoutes(controller: UserController): Router {
+  const router = Router();
+  router.get("/me", authMiddleware, controller.me);
+  // não existe cadastro público: só um admin autenticado cria usuários
+  router.post("/", authMiddleware, authorize(UserRole.ADMIN), controller.create);
+  return router;
+}
