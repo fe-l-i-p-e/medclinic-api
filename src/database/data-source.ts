@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   password: env.db.password,
   database: env.db.database,
   ssl: env.db.ssl ? { rejectUnauthorized: false } : false,
-  synchronize: true, // temporário: vira false no Módulo 1
+  synchronize: false,
   entities: [User, Patient],
   migrations: [__dirname + "/migrations/*{.ts,.js}"],
 });
