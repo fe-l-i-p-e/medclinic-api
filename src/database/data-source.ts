@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { env } from "../config/env";
 import { User } from "../entities/user.entity";
+import { WorkScheduleShift } from "../entities/work-schedule-shift.entity";
 import { Doctor } from "../entities/doctor.entity";
 import { Patient } from "../entities/patient.entity";
 
@@ -14,6 +15,6 @@ export const AppDataSource = new DataSource({
   database: env.db.database,
   ssl: env.db.ssl ? { rejectUnauthorized: false } : false,
   synchronize: false,
-  entities: [User, Patient, Doctor],
+  entities: [User, Patient, Doctor, WorkScheduleShift],
   migrations: [__dirname + "/migrations/*{.ts,.js}"],
 });
