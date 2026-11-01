@@ -10,5 +10,7 @@ export function createDoctorRoutes(controller: DoctorController): Router {
   router.post("/", authorize(UserRole.ADMIN), controller.create);
   router.get("/", controller.list);
   router.get("/:id", controller.getById);
+  router.put("/:doctorId/work-schedule", authorize(UserRole.ADMIN), controller.replaceWorkSchedule);
+  router.get("/:doctorId/work-schedule", controller.getWorkSchedule);
   return router;
 }
