@@ -4,6 +4,8 @@ import { AuthService } from "./services/auth.service";
 import { UserService } from "./services/user.service";
 import { AuthController } from "./controllers/auth.controller";
 import { UserController } from "./controllers/user.controller";
+import { WorkScheduleRepository } from "./repositories/work-schedule.repository";
+import { WorkScheduleService } from "./services/work-schedule.service";
 import { DoctorRepository } from "./repositories/doctor.repository";
 import { DoctorService } from "./services/doctor.service";
 import { DoctorController } from "./controllers/doctor.controller";
@@ -30,10 +32,13 @@ export function buildContainer(dataSource: DataSource): Controllers {
   const doctorRepository = new DoctorRepository(dataSource);
   const doctorService = new DoctorService(doctorRepository, userRepository, dataSource);
 
+  const workScheduleRepository = new WorkScheduleRepository(dataSource);
+  const workScheduleService = new WorkScheduleService(doctorRepository, workScheduleRepository);
+
   return {
     auth: new AuthController(authService),
     user: new UserController(userService),
-    doctor: new DoctorController(doctorService),
+    doctor: new DoctorController(doctorService, workScheduleService),
     patient: new PatientController(patientService),
   };
 }
