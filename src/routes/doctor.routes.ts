@@ -12,5 +12,6 @@ export function createDoctorRoutes(controller: DoctorController): Router {
   router.get("/:id", controller.getById);
   router.put("/:doctorId/work-schedule", authorize(UserRole.ADMIN), controller.replaceWorkSchedule);
   router.get("/:doctorId/work-schedule", controller.getWorkSchedule);
+  router.get("/:doctorId/calendar", controller.getCalendar);
   return router;
 }
