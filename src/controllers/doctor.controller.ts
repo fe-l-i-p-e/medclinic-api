@@ -1,12 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { DoctorService } from "../services/doctor.service";
 import { WorkScheduleService } from "../services/work-schedule.service";
+import { AppointmentService } from "../services/appointment.service";
 import { parsePagination } from "../utils/pagination";
+import { isValidDateRange } from "../utils/datetime";
+import { AppError } from "../utils/app-error";
 
 export class DoctorController {
   constructor(
     private doctorService: DoctorService,
-    private workScheduleService: WorkScheduleService
+    private workScheduleService: WorkScheduleService,
+    private appointmentService: AppointmentService
   ) {}
 
   create = async (req: Request, res: Response, next: NextFunction) => {
@@ -53,6 +57,24 @@ export class DoctorController {
   getWorkSchedule = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.workScheduleService.getSchedule(Number(req.params.doctorId));
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getCalendar = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const from = String(req.query.from ?? "");
+      const to = String(req.query.to ?? "");
+      if (!isValidDateRange(from, to)) {
+        throw new AppError("DADOS_INVALIDOS", 400, "Intervalo de datas inválido (máx. 31 dias).");
+      }
+      const result = await this.appointmentService.getCalendar(
+        Number(req.params.doctorId),
+        from,
+        to
+      );
       return res.status(200).json(result);
     } catch (error) {
       next(error);
