@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 import bcrypt from "bcrypt";
 
-export class SeedAdmin1793653946232982916 implements MigrationInterface {
+export class SeedAdmin1793800000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const email = process.env.SEED_ADMIN_EMAIL;
     const password = process.env.SEED_ADMIN_PASSWORD;
