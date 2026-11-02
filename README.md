@@ -71,3 +71,50 @@ docker run --env-file .env -p 3000:3000 medclinic-api
 ```
 
 A imagem é multi-stage e roda as migrations ao iniciar (`npm run start:prod`).
+
+## Perfis de acesso e administrador inicial
+
+Perfis: `admin`, `secretary` e `doctor` (o campo `roles` de um usuário é uma lista).
+
+**Não existe cadastro público.** O primeiro administrador é criado pela migration de seed com `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD`. Defina uma senha forte no ambiente de produção e troque a senha de teste após o primeiro acesso. Somente um administrador autenticado cria outros usuários (`POST /api/v1/users`).
+
+## Endpoints (prefixo `/api/v1`)
+
+| Método e rota                                | Perfis                    | Descrição                                            |
+| -------------------------------------------- | ------------------------- | ---------------------------------------------------- |
+| `GET /health`                                | público                   | Verificação de saúde                                 |
+| `POST /auth/login`                           | público                   | Login; devolve `{ "accessToken": "..." }`            |
+| `GET /users/me`                              | autenticado               | Usuário logado                                       |
+| `POST /users`                                | admin                     | Cria usuário com `roles`                             |
+| `POST /patients`                             | admin, secretary          | Cadastra paciente (CPF único)                        |
+| `GET /patients`, `GET /patients/:id`         | autenticado               | Lista (paginada) e detalhe                           |
+| `PATCH /patients/:id`                        | admin, secretary          | Atualiza paciente                                    |
+| `DELETE /patients/:id`                       | admin                     | Remove paciente (soft delete)                        |
+| `POST /doctors`                              | admin                     | Cria médico e usuário na mesma transação (CRM único) |
+| `GET /doctors`, `GET /doctors/:id`           | autenticado               | Lista e detalhe                                      |
+| `PUT /doctors/:id/work-schedule`             | admin                     | Substitui a escala (turnos por dia da semana)        |
+| `GET /doctors/:id/work-schedule`             | autenticado               | Consulta a escala                                    |
+| `GET /doctors/:id/calendar?from=&to=`        | autenticado               | Escala e consultas do período (máx. 31 dias)         |
+| `POST /appointments`                         | admin, secretary          | Agenda consulta (valida escala, grade e conflitos)   |
+| `GET /appointments`, `GET /appointments/:id` | autenticado               | Lista e detalhe (médico vê só as próprias)           |
+| `PATCH /appointments/:id/status`             | conforme a transição      | `scheduled → in_progress → done` ou `cancelled`      |
+| `POST /patients/:id/medical-records`         | doctor com vínculo        | Registra prontuário                                  |
+| `GET /patients/:id/medical-records`          | doctor com vínculo, admin | Lista prontuários                                    |
+
+Listagens usam o envelope `{ "data": [...], "meta": { "total", "page", "pageSize", "totalPages" } }`.
+
+### Formato de erro
+
+```json
+{
+  "statusCode": 409,
+  "error": "HORARIO_INDISPONIVEL",
+  "message": "Este horário acabou de ser ocupado."
+}
+```
+
+Códigos: `DADOS_INVALIDOS`, `NAO_AUTENTICADO`, `CREDENCIAIS_INVALIDAS`, `ACESSO_NEGADO`, `RECURSO_NAO_ENCONTRADO`, `EMAIL_JA_CADASTRADO`, `CPF_JA_CADASTRADO`, `CRM_JA_CADASTRADO`, `HORARIO_INDISPONIVEL`, `PACIENTE_INDISPONIVEL`, `HORARIO_FORA_DA_ESCALA`, `TRANSICAO_INVALIDA`.
+
+### Concorrência
+
+O agendamento usa lock pessimista na linha do médico dentro de uma transação, então dois pedidos simultâneos para o mesmo horário resultam em um `201` e um `409`.
