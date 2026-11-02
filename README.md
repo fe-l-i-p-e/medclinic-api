@@ -118,3 +118,14 @@ Códigos: `DADOS_INVALIDOS`, `NAO_AUTENTICADO`, `CREDENCIAIS_INVALIDAS`, `ACESSO
 ### Concorrência
 
 O agendamento usa lock pessimista na linha do médico dentro de uma transação, então dois pedidos simultâneos para o mesmo horário resultam em um `201` e um `409`.
+
+## Qualidade e entrega
+
+- **Testes:** Vitest sobre a camada de serviço, com cobertura mínima de 80% (`npm run test:cov`).
+- **CI:** o workflow `pr-workflow.yml` roda lint, formatação, build e testes com cobertura em todo pull request; a branch `main` é protegida e só recebe merge com o check verde.
+- **CD:** o workflow `deploy.yml` publica a imagem Docker e dispara o deploy a cada merge na `main`.
+
+## Links
+
+- API publicada: https://medclinic-api-2.onrender.com
+- Quadro do projeto: https://github.com/users/fe-l-i-p-e/projects/2
