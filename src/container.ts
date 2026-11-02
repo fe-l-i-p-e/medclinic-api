@@ -4,6 +4,10 @@ import { AuthService } from "./services/auth.service";
 import { UserService } from "./services/user.service";
 import { AuthController } from "./controllers/auth.controller";
 import { UserController } from "./controllers/user.controller";
+import { AppointmentRepository } from "./repositories/appointment.repository";
+import { AppointmentService } from "./services/appointment.service";
+import { AppointmentStatusService } from "./services/appointment-status.service";
+import { AppointmentController } from "./controllers/appointment.controller";
 import { WorkScheduleRepository } from "./repositories/work-schedule.repository";
 import { WorkScheduleService } from "./services/work-schedule.service";
 import { DoctorRepository } from "./repositories/doctor.repository";
@@ -16,6 +20,7 @@ import { PatientController } from "./controllers/patient.controller";
 export interface Controllers {
   auth: AuthController;
   user: UserController;
+  appointment: AppointmentController;
   doctor: DoctorController;
   patient: PatientController;
 }
@@ -35,10 +40,24 @@ export function buildContainer(dataSource: DataSource): Controllers {
   const workScheduleRepository = new WorkScheduleRepository(dataSource);
   const workScheduleService = new WorkScheduleService(doctorRepository, workScheduleRepository);
 
+  const appointmentRepository = new AppointmentRepository(dataSource);
+  const appointmentService = new AppointmentService(
+    doctorRepository,
+    patientRepository,
+    appointmentRepository,
+    workScheduleRepository,
+    dataSource
+  );
+  const appointmentStatusService = new AppointmentStatusService(
+    appointmentRepository,
+    doctorRepository
+  );
+
   return {
     auth: new AuthController(authService),
     user: new UserController(userService),
-    doctor: new DoctorController(doctorService, workScheduleService),
+    appointment: new AppointmentController(appointmentService, appointmentStatusService),
+    doctor: new DoctorController(doctorService, workScheduleService, appointmentService),
     patient: new PatientController(patientService),
   };
 }
