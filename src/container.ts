@@ -4,6 +4,9 @@ import { AuthService } from "./services/auth.service";
 import { UserService } from "./services/user.service";
 import { AuthController } from "./controllers/auth.controller";
 import { UserController } from "./controllers/user.controller";
+import { MedicalRecordRepository } from "./repositories/medical-record.repository";
+import { MedicalRecordService } from "./services/medical-record.service";
+import { MedicalRecordController } from "./controllers/medical-record.controller";
 import { AppointmentRepository } from "./repositories/appointment.repository";
 import { AppointmentService } from "./services/appointment.service";
 import { AppointmentStatusService } from "./services/appointment-status.service";
@@ -20,6 +23,7 @@ import { PatientController } from "./controllers/patient.controller";
 export interface Controllers {
   auth: AuthController;
   user: UserController;
+  medicalRecord: MedicalRecordController;
   appointment: AppointmentController;
   doctor: DoctorController;
   patient: PatientController;
@@ -53,9 +57,18 @@ export function buildContainer(dataSource: DataSource): Controllers {
     doctorRepository
   );
 
+  const medicalRecordRepository = new MedicalRecordRepository(dataSource);
+  const medicalRecordService = new MedicalRecordService(
+    patientRepository,
+    doctorRepository,
+    appointmentRepository,
+    medicalRecordRepository
+  );
+
   return {
     auth: new AuthController(authService),
     user: new UserController(userService),
+    medicalRecord: new MedicalRecordController(medicalRecordService),
     appointment: new AppointmentController(appointmentService, appointmentStatusService),
     doctor: new DoctorController(doctorService, workScheduleService, appointmentService),
     patient: new PatientController(patientService),
